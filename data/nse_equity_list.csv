@@ -1,0 +1,31 @@
+symbol,name,sector
+RELIANCE,Reliance Industries,Energy
+TCS,Tata Consultancy Services,IT
+HDFCBANK,HDFC Bank,Banking
+ICICIBANK,ICICI Bank,Banking
+INFY,Infosys,IT
+HINDUNILVR,Hindustan Unilever,FMCG
+ITC,ITC Ltd,FMCG
+SBIN,State Bank of India,Banking
+BHARTIARTL,Bharti Airtel,Telecom
+KOTAKBANK,Kotak Mahindra Bank,Banking
+LT,Larsen & Toubro,Infrastructure
+AXISBANK,Axis Bank,Banking
+BAJFINANCE,Bajaj Finance,Financial Services
+ASIANPAINT,Asian Paints,Paints
+MARUTI,Maruti Suzuki,Automobile
+TITAN,Titan Company,Consumer Goods
+SUNPHARMA,Sun Pharmaceutical,Pharma
+ULTRACEMCO,UltraTech Cement,Cement
+NESTLEIND,Nestle India,FMCG
+WIPRO,Wipro,IT
+BEL,Bharat Electronics,Defence
+HAL,Hindustan Aeronautics,Defence
+IRFC,Indian Railway Finance Corp,Railway
+IRCTC,IRCTC,Railway
+RVNL,Rail Vikas Nigam,Railway
+SUZLON,Suzlon Energy,Renewable
+ADANIGREEN,Adani Green Energy,Renewable
+TATAPOWER,Tata Power,Renewable
+NHPC,NHPC Ltd,Renewable
+COALINDIA,Coal India,Mining

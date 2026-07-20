@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  backend:
+    build: .
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./database:/app/database
+      - ./logs:/app/logs
+      - ./reports:/app/reports
+      - ./models:/app/models
+    env_file: .env
+    restart: unless-stopped
+
+  frontend:
+    build: .
+    command: streamlit run frontend/app.py --server.address 0.0.0.0 --server.port 8501
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./database:/app/database
+    env_file: .env
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # One-shot service: run `docker compose run scanner` to execute a scan on demand,
+  # or drive it from your own host cron if you don't want to use GitHub Actions.
+  scanner:
+    build: .
+    command: python -m scanner.scan_runner
+    volumes:
+      - ./database:/app/database
+      - ./logs:/app/logs
+      - ./models:/app/models
+    env_file: .env
+    profiles: ["manual"]

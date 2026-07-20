@@ -1,0 +1,71 @@
+name: Daily NSE Swing Scan
+
+# Runs every weekday at 18:30 IST (13:00 UTC), after NSE close (15:30 IST) with
+# a buffer for end-of-day data providers to settle. Adjust the cron below if
+# you want a different time — cron is always in UTC.
+on:
+  schedule:
+    - cron: "0 13 * * 1-5"
+  workflow_dispatch: {}   # lets you trigger a scan manually from the Actions tab
+
+permissions:
+  contents: write   # needed to commit the updated SQLite DB back to the repo
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90   # a full NSE (~2000 stock) scan can take a while; bump if needed
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Restore previous database (cache, so incremental fetch stays fast)
+        uses: actions/cache@v4
+        with:
+          path: database/swingtrader.db
+          key: swingtrader-db-${{ github.run_id }}
+          restore-keys: |
+            swingtrader-db-
+
+      - name: Write .env from repository secrets
+        run: |
+          cat > .env << EOF
+          DATABASE_URL=sqlite:///./database/swingtrader.db
+          NEWSAPI_KEY=${{ secrets.NEWSAPI_KEY }}
+          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
+          SMTP_USER=${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
+          ALERT_EMAIL_TO=${{ secrets.ALERT_EMAIL_TO }}
+          SCAN_UNIVERSE=ALL_NSE
+          MAX_WORKERS=15
+          EOF
+
+      - name: Run the daily scan
+        run: python -m scanner.scan_runner
+
+      - name: Commit updated database back to the repo
+        run: |
+          git config user.name "swingtrader-bot"
+          git config user.email "actions@github.com"
+          git add database/swingtrader.db
+          git diff --cached --quiet || git commit -m "Daily scan results: $(date -u +'%Y-%m-%d')"
+          git push
+
+      - name: Upload logs as artifact (debugging)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scan-logs-${{ github.run_id }}
+          path: logs/
+          retention-days: 14
